@@ -260,6 +260,13 @@ int main (int argc, char **argv) {
     int all = 0;
     int i;
 
+    if (argv[1][0] == '-' && argv[1][1] == 'h'){
+        printf(1,"cp [File] [File]\n");
+        printf(1,"cp /[Folder]/* /[Folder]/ to copy all files\n");
+        printf(1,"cp -R /[Folder]/ /[Folder]/ to recursively copy all files\n");
+        exit();
+    }
+
     for (i=0;i<strlen(argv[1])-1;i++){
         if (argv[1][i] == '*'){
             printf(1,"Misplaced *\n");
@@ -267,10 +274,7 @@ int main (int argc, char **argv) {
         }
     }
 
-    if (argv[1][strlen(argv[1])-1] == '*'){
-        all = 1;
-        printf(1,"* Found\n");
-    }
+    if (argv[1][strlen(argv[1])-1] == '*') all = 1;
 
     if (argv[1][0] == '-' && argv[1][1] == 'R') cp_recursion(argv[2],argv[3]);
 	else if (all) cp_all(argv[1],argv[2]);

@@ -137,6 +137,12 @@ int main (int argc, char **argv) {
     int all = 0;
     int i;
 
+    if (argv[1][0] == '-' && argv[1][1] == 'h'){
+        printf(1,"mv [File] [File]\n");
+        printf(1,"mv /[Folder]/* /[Folder]/ to move all files\n");
+        exit();
+    }
+
     for (i=0;i<strlen(argv[1])-1;i++){
         if (argv[1][i] == '*'){
             printf(1,"Misplaced *\n");

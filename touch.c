@@ -3,6 +3,11 @@
 
 int main(int argc, char **argv)
 {
+	if (argv[1][0] == '-' && argv[1][1] == 'h'){
+        printf(1,"touch [File1] [File2] ... to Create Files\n");
+        exit();
+    }
+
 	int fl;
 	int fr;
 	int i;

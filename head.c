@@ -25,6 +25,12 @@ void head(char *source){
 }
 
 int main (int argc, char **argv){
+
+    if (argv[1][0] == '-' && argv[1][1] == 'h'){
+        printf(1,"head [File] to Show The First Ten lines\n");
+        exit();
+    }
+
     head(argv[1]);
     exit();
 }
