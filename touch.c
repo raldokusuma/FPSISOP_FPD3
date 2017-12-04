@@ -1,15 +1,21 @@
-#include<stdio.h>
+#include "user.h"
+#include "fcntl.h"
 
 int main(int argc, char **argv)
 {
-	FILE *f1;
-	FILE *fr;
-
-	if ( fopen(argv[1],"r") == NULL) {
-		f1=fopen(argv[1],"w+");
-		fclose(f1);
+	int fl;
+	int fr;
+	int i;
+	for (i=1;i<argc;i++){
+        if ((fr = open(argv[i], O_RDONLY)) > 0) {
+            printf(1,"File %s Sudah Ada\n",argv[i]);
+        } else {
+            fl = open(argv[i], O_CREATE);
+            close(fl);
+        }
+        close(fr);
 	}
 
-	
-	return 0;
+	exit();
 }
+
