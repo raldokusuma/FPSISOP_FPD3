@@ -179,9 +179,10 @@ UPROGS=\
 	_cp\
 	_head\
 	_pwd\
+	_base64\
 
-fs.img: mkfs README $(UPROGS) .pwd
-	./mkfs fs.img README $(UPROGS) .pwd
+fs.img: mkfs README $(UPROGS) .pwd .tes
+	./mkfs fs.img README $(UPROGS) .pwd .tes
 
 -include *.d
 
@@ -194,7 +195,7 @@ clean:
 
 # make a printout
 FILES = $(shell grep -v '^\#' runoff.list)
-PRINT = runoff.list runoff.spec README .pwd toc.hdr toc.ftr $(FILES)
+PRINT = runoff.list runoff.spec README .pwd .tes toc.hdr toc.ftr $(FILES)
 
 xv6.pdf: $(PRINT)
 	./runoff
@@ -248,9 +249,9 @@ qemu-nox-gdb: fs.img xv6.img .gdbinit
 EXTRA=\
 	mkfs.c ulib.c user.h cat.c echo.c forktest.c grep.c kill.c\
 	ln.c ls.c mkdir.c rm.c stressfs.c usertests.c wc.c zombie.c\
-	printf.c umalloc.c touch.c mv.c cp.c head.c pwd.c\
+	printf.c umalloc.c touch.c mv.c cp.c head.c pwd.c base64.c\
 	README dot-bochsrc *.pl toc.* runoff runoff1 runoff.list\
-	.gdbinit.tmpl gdbutil .pwd\
+	.gdbinit.tmpl gdbutil .pwd .tes\
 
 dist:
 	rm -rf dist
