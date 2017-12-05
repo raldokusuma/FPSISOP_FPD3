@@ -65,18 +65,11 @@ void mv_all(char *path,char *destination)
     struct stat st;
     //*/
 
-    int pwd;
-    char *tmp = {""};
-    strcat(tmp,path);
-    tmp[strlen(tmp)-1]='\0';
-    strcat(tmp,".pwd");
-    pwd = open(tmp,O_RDONLY);
-
-    char dummy[1024];
-    read(pwd,dummy,sizeof(dummy));
-    dummy[strlen(dummy)] = '.';
-    dummy[strlen(dummy)+1] = '\0';
-    //printf(1,"alamat : %s\n",dummy);
+    char *dummy = malloc(1024);
+    memset(dummy,0,1024);
+    strcat(dummy,path);
+    //dummy[strlen(dummy)-1] = '\0';
+    strcat(dummy,".");
 
     if((fd = open(dummy, 0)) < 0){
         printf(2, "ls: cannot open %s\n", dummy);
@@ -129,13 +122,11 @@ void mv_all(char *path,char *destination)
             }
             break;
     }
-    close(pwd);
     close(fd);
 }
 
 int main (int argc, char **argv) {
     int all = 0;
-    int i;
 
     if (argv[1][0] == '-' && argv[1][1] == 'h'){
         printf(1,"mv [File] [File]\n");
@@ -143,20 +134,28 @@ int main (int argc, char **argv) {
         exit();
     }
 
-    for (i=0;i<strlen(argv[1])-1;i++){
-        if (argv[1][i] == '*'){
-            printf(1,"Misplaced *\n");
-            exit();
-        }
-    }
-
-    if (argv[1][strlen(argv[1])-1] == '*'){
+    if (argv[1][strlen(argv[1])-1] == '*') {
         all = 1;
-        printf(1,"* Found\n");
+        argv[1][strlen(argv[1])-1] = '\0';
     }
 
-	if (all) mv_all(argv[1],argv[2]);
-	else mv(argv[1],argv[2]);
+	struct stat st1;
+    struct stat st2;
+    int s1,s2;
 
+    s1 = open(argv[1],O_RDONLY);
+    s2 = open(argv[2],O_RDONLY);
+    fstat(s1, &st1);
+    fstat(s2, &st2);
+    if (st1.type == T_DIR && st2.type == T_DIR && all){
+        mv_all(argv[1],argv[2]);
+        exit();
+    }
+    else if (st1.type == T_FILE){
+        mv(argv[1],argv[2]);
+        exit();
+    }
+
+    printf(1,"Try 'mv -h' for more information.\n");
 	exit();
 }

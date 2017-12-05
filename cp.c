@@ -82,101 +82,11 @@ void cp_all(char *path,char *destination)
     struct stat st;
     //*/
 
-    int pwd;
-    char *tmp = {""};
-    strcat(tmp,path);
-    tmp[strlen(tmp)-1]='\0';
-    strcat(tmp,".pwd");
-    pwd = open(tmp,O_RDONLY);
-
-    char dummy[1024];
-    read(pwd,dummy,sizeof(dummy));
-    dummy[strlen(dummy)] = '.';
-    dummy[strlen(dummy)+1] = '\0';
-    printf(1,"alamat : %s\n",dummy);
-
-    if((fd = open(dummy, 0)) < 0){
-        printf(2, "ls: cannot open %s\n", dummy);
-        return;
-    }
-
-    if(fstat(fd, &st) < 0){
-        printf(2, "ls: cannot stat %s\n", dummy);
-        close(fd);
-        return;
-    }
-
-    switch(st.type){
-        case T_FILE:
-            printf(1, "%s %d %d %d\n", fmtname(dummy), st.type, st.ino, st.size);
-            break;
-
-        case T_DIR:
-            if(strlen(dummy) + 1 + DIRSIZ + 1 > sizeof buf){
-                printf(1, "ls: path too long\n");
-                break;
-            }
-            strcpy(buf, dummy);
-            p = buf+strlen(buf);
-            *p++ = '/';
-
-            while(read(fd, &de, sizeof(de)) == sizeof(de)){
-                if(de.inum == 0) continue;
-                memmove(p, de.name, DIRSIZ);
-                p[DIRSIZ] = 0;
-                if(stat(buf, &st) < 0){
-                    printf(1, "ls: cannot stat %s\n", buf);
-                    continue;
-                }
-                if (fmtname(buf)[0] != '.' && st.type == T_FILE){
-                    char *name = fmtname(buf);
-
-                    char *tmp1 = malloc(100);
-                    memset(tmp1,0,100);
-                    strcat(tmp1,dummy);
-                    tmp1[strlen(tmp1)-1]='\0';
-                    strcat(tmp1,name);
-
-                    char *tmp = malloc(100);
-                    memset(tmp,0,100);
-                    strcat(tmp,destination);
-                    strcat(tmp,name);
-                    //cp(tmp1,tmp);
-                }
-            }
-            break;
-    }
-    close(pwd);
-    close(fd);
-}
-
-void cp_recursion(char *path,char *destination)
-{
-    ///*
-    char buf[512], *p;
-    int fd;
-    struct dirent de;
-    struct stat st;
-    //*/
-
-    int pwd;
-    char *tmp = {""};
-    /*
-    if (path[strlen(dummy)-1] != '/'){
-        path[strlen(dummy)] = '/';
-        path[strlen(dummy)+1] = '\0';
-    }
-    */
-    strcat(tmp,path);
-    strcat(tmp,".pwd");
-    pwd = open(tmp,O_RDONLY);
-
     char *dummy = malloc(1024);
     memset(dummy,0,1024);
-    read(pwd,dummy,sizeof(dummy));
-    dummy[strlen(dummy)] = '.';
-    dummy[strlen(dummy)+1] = '\0';
-    //printf(1,"alamat : %s\n",dummy);
+    strcat(dummy,path);
+    //dummy[strlen(dummy)-1] = '\0';
+    strcat(dummy,".");
 
     if((fd = open(dummy, 0)) < 0){
         printf(2, "ls: cannot open %s\n", dummy);
@@ -226,39 +136,109 @@ void cp_recursion(char *path,char *destination)
                     strcat(tmp,name);
                     cp(tmp1,tmp);
                 }
-                if (fmtname(buf)[0] != '.' && st.type == T_DIR){
+            }
+            break;
+    }
+    close(fd);
+}
+
+void cp_recursion(char *path,char *destination)
+{
+    char buf[512], *p;
+    int fd;
+    struct dirent de;
+    struct stat st;
+
+    char *dummy = malloc(1024);
+    memset(dummy,0,1024);
+    strcat(dummy,path);
+    strcat(dummy,".");
+
+    if((fd = open(dummy, 0)) < 0){
+        printf(2, "ls: cannot open %s\n", dummy);
+        return;
+    }
+
+    if(fstat(fd, &st) < 0){
+        printf(2, "ls: cannot stat %s\n", dummy);
+        close(fd);
+        return;
+    }
+
+    switch(st.type){
+        case T_FILE:
+            printf(1, "%s %d %d %d\n", fmtname(dummy), st.type, st.ino, st.size);
+            break;
+
+        case T_DIR:
+            if(strlen(dummy) + 1 + DIRSIZ + 1 > sizeof buf){
+                printf(1, "ls: path too long\n");
+                break;
+            }
+            strcpy(buf, dummy);
+            p = buf+strlen(buf);
+            *p++ = '/';
+
+            while(read(fd, &de, sizeof(de)) == sizeof(de)){
+                if(de.inum == 0) continue;
+                memmove(p, de.name, DIRSIZ);
+                p[DIRSIZ] = 0;
+                if(stat(buf, &st) < 0){
+                    printf(1, "ls: cannot stat %s\n", buf);
+                    continue;
+                }
+                if (fmtname(buf)[0] != '.' && st.type == T_FILE){
+                    printf(1,"File Type\n");
                     char *name = fmtname(buf);
 
-                    char *tmp1 = malloc(100);
-                    memset(tmp1,0,100);
-                    strcat(tmp1,dummy);
-                    tmp1[strlen(tmp1)-1]='\0';
-                    strcat(tmp1,name);
-                    strcat(tmp1,"/");
+                    char *next_source = malloc(100);
+                    memset(next_source,0,100);
+                    strcat(next_source,dummy);
+                    next_source[strlen(next_source)-1]='\0';
+                    strcat(next_source,name);
 
-                    char *tmp = malloc(100);
-                    memset(tmp,0,100);
-                    strcat(tmp,destination);
-                    strcat(tmp,name);
-                    mkdir(tmp);
-                    absolute_path(tmp);
-                    strcat(tmp,"/");
+                    char *next_destination = malloc(100);
+                    memset(next_destination,0,100);
+                    strcat(next_destination,destination);
+                    strcat(next_destination,name);
 
-                    printf(1,"path %s\n",tmp1);
-                    printf(1,"dest %s\n",tmp);
+                    printf(1,"path %s\n",next_source);
+                    printf(1,"dest %s\n",next_destination);
 
-                    cp_recursion(tmp1,tmp);
+                    cp(next_source,next_destination);
+                }
+                if (fmtname(buf)[0] != '.' && st.type == T_DIR){
+                    printf(1,"Directory Type\n");
+                    char *name = fmtname(buf);
+
+                    char *next_source = malloc(100);
+                    memset(next_source,0,100);
+                    strcat(next_source,dummy);
+                    next_source[strlen(next_source)-1]='\0';
+                    strcat(next_source,name);
+                    strcat(next_source,"/");
+
+                    char *next_destination = malloc(100);
+                    memset(next_destination,0,100);
+                    strcat(next_destination,destination);
+                    strcat(next_destination,name);
+                    mkdir(next_destination);
+                    absolute_path(next_destination);
+                    strcat(next_destination,"/");
+
+                    printf(1,"path %s\n",next_source);
+                    printf(1,"dest %s\n",next_destination);
+
+                    cp_recursion(next_source,next_destination);
                 }
             }
             break;
     }
-    close(pwd);
     close(fd);
 }
 
 int main (int argc, char **argv) {
     int all = 0;
-    int i;
 
     if (argv[1][0] == '-' && argv[1][1] == 'h'){
         printf(1,"cp [File] [File]\n");
@@ -267,18 +247,41 @@ int main (int argc, char **argv) {
         exit();
     }
 
-    for (i=0;i<strlen(argv[1])-1;i++){
-        if (argv[1][i] == '*'){
-            printf(1,"Misplaced *\n");
-            exit();
-        }
+    if (argv[1][strlen(argv[1])-1] == '*') {
+        all = 1;
+        argv[1][strlen(argv[1])-1] = '\0';
     }
 
-    if (argv[1][strlen(argv[1])-1] == '*') all = 1;
+    struct stat st1;
+    struct stat st2;
 
-    if (argv[1][0] == '-' && argv[1][1] == 'R') cp_recursion(argv[2],argv[3]);
-	else if (all) cp_all(argv[1],argv[2]);
-	else cp(argv[1],argv[2]);
+    int s1;
+    int s2;
 
+    if (argv[1][0] == '-' && argv[1][1] == 'R'){
+        s1 = open(argv[2],O_RDONLY);
+        s2 = open(argv[3],O_RDONLY);
+        fstat(s1, &st1);
+        fstat(s2, &st2);
+        if (st1.type == T_DIR && st2.type == T_DIR){
+            cp_recursion(argv[2],argv[3]);
+            exit();
+        }
+    } else {
+        s1 = open(argv[1],O_RDONLY);
+        s2 = open(argv[2],O_RDONLY);
+        fstat(s1, &st1);
+        fstat(s2, &st2);
+        if (st1.type == T_DIR && st2.type == T_DIR && all){
+            cp_all(argv[1],argv[2]);
+            exit();
+        }
+        else if (st1.type == T_FILE){
+            cp(argv[1],argv[2]);
+            exit();
+        }
+	}
+
+    printf(1,"Try 'cp -h' for more information.\n");
 	exit();
 }
