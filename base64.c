@@ -5,22 +5,6 @@
 #include "fs.h"
 
 char b64[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-/*
-int strcmp(char *a, char *b)
-{
-   int c = 0;
-
-   while (a[c] == b[c]) {
-      if (a[c] == '\0' || b[c] == '\0')
-         break;
-      c++;
-   }
-
-   if (a[c] == '\0' && b[c] == '\0')
-      return 0;
-   else
-      return -1;
-}*/
 
 char *strcat(char *dest, unsigned char *src)
 {
@@ -105,6 +89,11 @@ void b64_encode(char *clrstr, char *b64dst) {
 int main(int argc, char **argv) {
   char myb64[1024];
   int fop;
+
+  if(argc<2){
+    printf(1,"To few arguments\n");
+    exit();
+  }
 
   if(strcmp(argv[1],"-d")==0){
 	if ((fop = open(argv[2],O_RDONLY)) < 0){
